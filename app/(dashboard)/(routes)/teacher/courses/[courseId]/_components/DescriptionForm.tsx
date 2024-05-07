@@ -17,21 +17,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 type TitleFormsProps = {
   initialData: {
-    title: string;
+    description: string;
   };
   courseId: string;
 };
 
 const formSchema = z.object({
-  title: z.string().min(1, {
-    message: "Title is required",
+  description: z.string().min(1, {
+    message: "Description is required",
   }),
 });
 
-export default function TitleForms({ initialData, courseId }: TitleFormsProps) {
+export default function DescriptionForm({ initialData, courseId }: TitleFormsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
@@ -47,7 +49,7 @@ export default function TitleForms({ initialData, courseId }: TitleFormsProps) {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("Course updated");
-      
+
       toggleEdit();
       router.refresh();
     } catch {
@@ -57,32 +59,39 @@ export default function TitleForms({ initialData, courseId }: TitleFormsProps) {
   return (
     <div className="mt-6 boder bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between gapy1">
-        Course title
+        Course Description
         <Button onClick={toggleEdit} variant={"ghost"}>
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit title
+              Edit Description
             </>
           )}
         </Button>
       </div>
       {!isEditing ? (
-        <p className="text-sm mt-2">{initialData.title}</p>
+        <p
+          className={cn(
+            "text-sm mt-2",
+            !initialData.description && "text-slate-500 italic"
+          )}
+        >
+          {initialData.description || "No description"}
+        </p>
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
-              name="title"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <Textarea
                       disabled={isSubmitting}
-                      placeholder='e.g "Advance web development"'
+                      placeholder='e.g "This course is about blender..."'
                       {...field}
                     />
                   </FormControl>

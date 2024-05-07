@@ -5,6 +5,9 @@ import { LayoutDashboard } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
 import TitleForm from "./_components/TitleForm";
+import DescriptionForms from "./_components/DescriptionForm";
+import DescriptionForm from "./_components/DescriptionForm";
+import { ImageForm } from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/imageForm";
 
 const Page = async ({ params }: { params: { courseId: string } }) => {
   const { userId } = auth();
@@ -15,7 +18,6 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
     },
   });
   if (!course) return redirect("/");
-  console.log(course);
 
   //   ---------------------------------------------------
 
@@ -50,6 +52,10 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
             <h2>Customize your course</h2>
           </div>
           <TitleForm initialData={course} courseId={course.id} />
+          {/* @ts-ignore */}
+          <DescriptionForm initialData={course} courseId={course.id} />
+          <ImageForm initialData={course} courseId={course.id} />
+
         </div>
       </div>
     </div>
