@@ -8,6 +8,7 @@ import TitleForm from "./_components/TitleForm";
 import DescriptionForms from "./_components/DescriptionForm";
 import DescriptionForm from "./_components/DescriptionForm";
 import { ImageForm } from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/imageForm";
+import { CategoryForm } from "./_components/Categoryform";
 
 const Page = async ({ params }: { params: { courseId: string } }) => {
   const { userId } = auth();
@@ -17,6 +18,12 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
       id: params.courseId,
     },
   });
+  const categories = await db.category.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
   if (!course) return redirect("/");
 
   //   ---------------------------------------------------
@@ -52,10 +59,17 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
             <h2>Customize your course</h2>
           </div>
           <TitleForm initialData={course} courseId={course.id} />
-          {/* @ts-ignore */}
+
           <DescriptionForm initialData={course} courseId={course.id} />
           <ImageForm initialData={course} courseId={course.id} />
-
+          <CategoryForm
+            initialData={course}
+            courseId={course.id}
+            options={categories.map((category) => ({
+              label: category.name,
+              value: category.id,
+            }))}
+          />
         </div>
       </div>
     </div>

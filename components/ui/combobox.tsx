@@ -1,35 +1,36 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandItem,
   CommandEmpty,
   CommandGroup,
   CommandInput,
-} from '@/components/ui/command'
+  CommandList,
+  CommandItem,
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
+} from "@/components/ui/popover";
 
 interface ComboboxInterface {
-  value?: string
-  onChange: (value: string) => void
+  value?: string;
+  onChange: (value: string) => void;
   options: {
-    value: string
-    label: string
-  }[]
+    value: string;
+    label: string;
+  }[];
 }
 
 const Combobox = React.forwardRef<HTMLButtonElement, ComboboxInterface>(
   ({ options, onChange, value }, ref) => {
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(false);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -41,8 +42,8 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxInterface>(
             className="justify-between w-full"
           >
             {value
-              ? options.find(option => option.value === value)?.label
-              : 'Select option...'}
+              ? options.find((option) => option.value === value)?.label
+              : "Select option..."}
             <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
           </Button>
         </PopoverTrigger>
@@ -50,32 +51,34 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxInterface>(
           <Command>
             <CommandInput placeholder="Search option..." />
             <CommandEmpty>No option found.</CommandEmpty>
-            <CommandGroup>
-              {options.map(option => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    onChange(option.value === value ? '' : option.value)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      value === option.value ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandList>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      onChange(option.value === value ? "" : option.value);
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
-    )
-  },
-)
+    );
+  }
+);
 
-Combobox.displayName = 'Combobox'
+Combobox.displayName = "Combobox";
 
-export { Combobox }
+export { Combobox };

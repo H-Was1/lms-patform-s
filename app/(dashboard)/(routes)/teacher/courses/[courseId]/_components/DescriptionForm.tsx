@@ -19,11 +19,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
+import { Course } from "@prisma/client";
 
 type TitleFormsProps = {
-  initialData: {
-    description: string;
-  };
+  initialData: Course;
   courseId: string;
 };
 
@@ -33,7 +32,10 @@ const formSchema = z.object({
   }),
 });
 
-export default function DescriptionForm({ initialData, courseId }: TitleFormsProps) {
+export default function DescriptionForm({
+  initialData,
+  courseId,
+}: TitleFormsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
