@@ -41,7 +41,10 @@ export default function DescriptionForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      description: initialData.description || "", // Replace null with an empty string
+    },
   });
 
   const { isSubmitting, isValid } = form.formState;
