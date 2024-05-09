@@ -1,14 +1,21 @@
 import IconBadge from "@/components/IconBadge";
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { LayoutDashboard } from "lucide-react";
+import {
+  CircleDollarSign,
+  File,
+  LayoutDashboard,
+  ListChecks,
+} from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
 import TitleForm from "./_components/TitleForm";
-import DescriptionForms from "./_components/DescriptionForm";
 import DescriptionForm from "./_components/DescriptionForm";
 import { ImageForm } from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/imageForm";
 import { CategoryForm } from "./_components/Categoryform";
+import PriceForm from "./_components/priceForm";
+import { AttachmentForm } from "./_components/AttachmentForm";
+import { ChaptersForm } from "./_components/ChapterForm";
 
 const Page = async ({ params }: { params: { courseId: string } }) => {
   const { userId } = auth();
@@ -16,6 +23,19 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
   const course = await db.course.findUnique({
     where: {
       id: params.courseId,
+      userId,
+    },
+    include: {
+      chapters: {
+        orderBy: {
+          position: "asc",
+        },
+      },
+      attachments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
   const categories = await db.category.findMany({
@@ -34,6 +54,7 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
     course.categoryId,
     course.price,
     course.imageUrl,
+    course.chapters.some((chapter) => chapter.isPublished),
   ];
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
@@ -70,6 +91,45 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
               value: category.id,
             }))}
           />
+        </div>
+        <div className="space-y-6">
+          <div className="">
+            <div className="flex items-center gap-x-2">
+              <IconBadge
+                Icon={ListChecks}
+                //   iconVariant={""}
+                variant={"success"}
+                size={"small"}
+              />
+              <h2>Course chapters</h2>
+            </div>
+            {/* <div className="">TODO: Chapters</div> */}
+            <ChaptersForm initialData={course} courseId={course.id} />
+          </div>
+          <div className="">
+            <div className="flex items-center gap-x-2">
+              <IconBadge
+                Icon={CircleDollarSign}
+                //   iconVariant={""}
+                variant={"success"}
+                size={"small"}
+              />
+              <h2>Sell your Course.</h2>
+            </div>
+            <PriceForm initialData={course} courseId={course.id} />
+          </div>
+          <div className="">
+            <div className="flex items-center gap-x-2">
+              <IconBadge
+                Icon={File}
+                //   iconVariant={""}
+                variant={"success"}
+                size={"small"}
+              />
+              <h2>Resources & Attachments</h2>
+            </div>
+            <AttachmentForm initialData={course} courseId={course.id} />
+          </div>
         </div>
       </div>
     </div>
