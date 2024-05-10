@@ -19,8 +19,8 @@ import {
   FormMessage,
   FormControl,
 } from '@/components/ui/form'
-import { toast } from 'sonner'
 import { ChaptersList } from './ChaptersList'
+import { toast } from 'sonner'
 
 interface ChaptersFormProps {
   courseId: string

@@ -103,7 +103,6 @@ const Page = async ({ params }: { params: { courseId: string } }) => {
               />
               <h2>Course chapters</h2>
             </div>
-            {/* <div className="">TODO: Chapters</div> */}
             <ChaptersForm initialData={course} courseId={course.id} />
           </div>
           <div className="">

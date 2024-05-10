@@ -1,9 +1,18 @@
-import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import React from "react";
+import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
 
-const Page = async ({
+import { db } from "@/lib/db";
+import { Banner } from "@/components/banner";
+import { ChapterActions } from "@/components/chapter-actions";
+import IconBadge from "@/components/IconBadge";
+import { ChapterAccessForm } from "@/components/chapter-access-form";
+import { ChapterDescriptionForm } from "@/components/chapter-description-form";
+import { ChapterTitleForm } from "@/components/chapter-title-form";
+import { ChapterVideoForm } from "@/components/chapter-video-form";
+import { auth } from "@clerk/nextjs/server";
+
+const ChapterIdPage = async ({
   params,
 }: {
   params: {
@@ -12,7 +21,11 @@ const Page = async ({
   };
 }) => {
   const { userId } = auth();
-  if (!userId) return redirect("/");
+
+  if (!userId) {
+    return redirect("/");
+  }
+
   const chapter = await db.chapter.findUnique({
     where: {
       id: params.chapterId,
@@ -20,89 +33,115 @@ const Page = async ({
     },
     include: {
       muxData: true,
+      course: {
+        select: {
+          userId: true,
+        },
+      },
     },
   });
-  if (!chapter) return redirect("/");
+
+  if (!chapter || chapter.course.userId !== userId) {
+    return redirect("/");
+  }
+
   const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
+
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
   const completionText = `(${completedFields}/${totalFields})`;
 
-  return (
-    <div>
-      {userProgress?.isCompleted && (
-        <Banner variant="success" label="You already completed this chapter." />
-      )}
+  const isCompleted = requiredFields.every(Boolean);
 
-      {isLocked && (
+  return (
+    <>
+      {!chapter.isPublished && (
         <Banner
           variant="warning"
-          label="You need to purchase this course to watch this chapter."
+          label="This chapter is unpublished. It will not be visible in the course."
         />
       )}
 
-      <div className="flex flex-col max-w-4xl pb-20 mx-auto">
-        <div className="p-4">
-          <VideoPlayer
-            isLocked={isLocked}
-            title={chapter.title}
-            courseId={params.courseId}
-            chapterId={params.chapterId}
-            completeOnEnd={completeOnEnd}
-            nextChapterId={nextChapter?.id}
-            playbackId={muxData?.playbackId!}
-          />
-        </div>
+      <div className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="w-full">
+            <Link
+              href={`/teacher/courses/${params.courseId}`}
+              className="flex items-center mb-6 text-sm transition hover:opacity-75"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to course setup
+            </Link>
 
-        <div>
-          <div className="flex flex-col items-center justify-between p-4 md:flex-row">
-            <h2 className="mb-2 text-2xl font-semibold">{chapter.title}</h2>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col gap-y-2">
+                <h1 className="text-2xl font-medium">Chapter Creation</h1>
 
-            {purchase ? (
-              <CourseProgressButton
+                <span className="text-sm text-slate-700">
+                  Complete all field {completionText}
+                </span>
+              </div>
+
+              <ChapterActions
+                disabled={!isCompleted}
                 courseId={params.courseId}
                 chapterId={params.chapterId}
-                nextChapterId={nextChapter?.id}
-                isCompleted={!!userProgress?.isCompleted}
+                isPublished={chapter.isPublished}
               />
-            ) : (
-              <CurseEnrollButton
-                price={course.price!}
-                courseId={params.courseId}
-              />
-            )}
+            </div>
           </div>
+        </div>
 
-          <Separator />
+        <div className="grid grid-cols-1 gap-6 mt-16 md:grid-cols-2">
+          <div className="space-y-6">
+            <div className="flex items-center gap-x-2">
+              <IconBadge Icon={LayoutDashboard} />
+
+              <h2 className="text-xl">Customize your chapter</h2>
+            </div>
+
+            <ChapterTitleForm
+              initialData={chapter}
+              courseId={params.courseId}
+              chapterId={params.chapterId}
+            />
+
+            <ChapterDescriptionForm
+              initialData={chapter}
+              courseId={params.courseId}
+              chapterId={params.chapterId}
+            />
+
+            <div>
+              <div className="flex items-center gap-x-2">
+                <IconBadge Icon={Eye} />
+                <h2 className="text-xl">Access Settings</h2>
+              </div>
+
+              <ChapterAccessForm
+                initialData={chapter}
+                courseId={params.courseId}
+                chapterId={params.chapterId}
+              />
+            </div>
+          </div>
 
           <div>
-            <Preview value={chapter.description!} />
+            <div className="flex items-center gap-x-2">
+              <IconBadge Icon={Video} />
+              <h2 className="text-xl">Add a video</h2>
+            </div>
+
+            <ChapterVideoForm
+              initialData={chapter}
+              courseId={params.courseId}
+              chapterId={params.chapterId}
+            />
           </div>
-
-          {!!attachments.length && (
-            <>
-              <Separator />
-
-              <div className="p-4">
-                {attachments.map(attachment => (
-                  <a
-                    target="_blank"
-                    key={attachment.id}
-                    href={attachment.url}
-                    rel="noopener noreferrer nofollow external"
-                    className="flex items-center w-full p-3 border rounded-md bg-sky-200 text-sky-700 hover:underline"
-                  >
-                    <File />
-                    <p className="line-clamp-1">{attachment.name}</p>
-                  </a>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </div>
-    </div>
-  )
-}
+    </>
+  );
+};
 
-export default Page;
+export default ChapterIdPage;
