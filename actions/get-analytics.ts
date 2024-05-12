@@ -40,8 +40,8 @@ export const getAnalytics = async (userId: string) => {
     const groupedEarnings = groupByCourse(purchases)
     const data = Object.entries(groupedEarnings).map(
       ([courseTitle, total]) => ({
-        total,
         name: courseTitle,
+        total,
       }),
     )
 
